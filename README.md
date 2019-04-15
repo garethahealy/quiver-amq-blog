@@ -57,7 +57,7 @@ The demo will show the following:
 - Send and receive messages via Quiver using an JMS client over AMQP protocol to the broker
 - Send and receive messages via Quiver using an JMS client over AMQP protocol to interconnect
 
-[![asciicast](https://asciinema.org/a/amuJ4J5V9cey9aCKi33q0ybFp.png)](https://asciinema.org/a/amuJ4J5V9cey9aCKi33q0ybFp)
+[![asciicast](https://asciinema.org/a/240989.png)](https://asciinema.org/a/240989)
 
 ## Do it yourself demo
 Want to play with the Quiver, AMQ and OCP yourself?
