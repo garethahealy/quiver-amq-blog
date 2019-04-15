@@ -166,3 +166,5 @@ buildNumber.properties
 ### Travis
 travis-encrypt.sh
 *.asc
+
+/README.html
