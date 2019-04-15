@@ -5,7 +5,7 @@ Unsure what Red Hat AMQ is and how it can help? Check out this [webinar.](https:
 
 As part of the Red Hat [UKI Professional Services](https://www.redhat.com/en/services/consulting) team,
 I have worked with several customers who are implementing [AMQ Broker](https://developers.redhat.com/products/amq/overview/) on
-[OpenShift Container Platform (OCP)](https://developers.redhat.com/products/openshift/overview/). One question customers typically ask is: 
+[OpenShift Container Platform (OCP)](https://developers.redhat.com/products/openshift/overview/). One question customers typically ask is:
 "_How do we validate the AMQ configuration is correct for our scenario?_".
 
 Previously, I would of suggested one of the following:
@@ -18,7 +18,7 @@ These tools can give you indicators around:
 - Can the broker handle a certain performance characteristic? i.e.: what is my minimum publish rate per second for this configuration?
 - and many more, but...
 
-The problem with the above tools is that you cannot choose the client technology; which could lead to real-world differences 
+The problem with the above tools is that you cannot choose the client technology; which could lead to real-world differences
 and limited technology choices that might lead you down the wrong technology path. i.e.:
 - do you get the same performance from JMeter vs the [AMQ clients](https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html/amq_clients_overview/components) you would use in production? comparing like for like, apples with apples
 
@@ -29,24 +29,24 @@ So what do I think is the answer? [Quiver](https://github.com/ssorj/quiver)[*[1]
 
 Straight from the horse's mouth:
 
-    Quiver implementations are native clients (and sometimes also servers) in various languages and APIs that either 
-    send or receive messages and write raw information about the transfers to standard output. 
-    They are deliberately simple.
-    
-    The quiver-arrow command runs a single implementation in send or receive mode and captures its output. 
-    It has options for defining the execution parameters, selecting the implementation, and reporting statistics.
-    
-    The quiver command launches a pair of quiver-arrow instances, one sender and one receiver, and produces a 
-    summary of the end-to-end transmission of messages.
+> Quiver implementations are native clients (and sometimes also servers) in various languages and APIs that either
+> send or receive messages and write raw information about the transfers to standard output.
+> They are deliberately simple.
+
+> The quiver-arrow command runs a single implementation in send or receive mode and captures its output.
+> It has options for defining the execution parameters, selecting the implementation, and reporting statistics.
+
+> The quiver command launches a pair of quiver-arrow instances, one sender and one receiver, and produces a
+> summary of the end-to-end transmission of messages.
 
 In my own words;
 
-    Quiver is a tool that starts both a publisher and receiver client with the aim of completing as fast as possible.
-    Once the publisher and receiver have completed; a statistical output is generated which can give you insight into how the test has performed.
-    
-    The clients are based on the [Apache QPid](https://qpid.apache.org/) project that offers; Java, C++, Python and Javascript 
-    implementations to name a few. The clients primarily target audience is [JMS](https://download.oracle.com/otndocs/jcp/jms-2_0-fr-eval-spec/) 
-    and [AMQP](http://www.amqp.org/resources/download) users.
+> Quiver is a tool that starts both a publisher and receiver client with the aim of completing as fast as possible.
+> Once the publisher and receiver have completed; a statistical output is generated which can give you insight into how the test has performed.
+
+> The clients are based on the [Apache Qpid](https://qpid.apache.org/) project that offers; Java, C++, Python and Javascript
+> implementations to name a few. The clients primarily target [JMS](https://download.oracle.com/otndocs/jcp/jms-2_0-fr-eval-spec/)
+> and [AMQP](http://www.amqp.org/resources/download) users.
 
 ## Recorded demo
 Feeling lazy and want to watch a [asciinema](https://asciinema.org/) recording?
@@ -66,7 +66,7 @@ The demo uses an OCP template which requires two arguments:
 - DOCKER_IMAGE; location of the fully qualified docker pull URL. This can be resolved via the imported image stream; oc get is quiver -o jsonpath='{.status.dockerImageRepository}'
 - DOCKER_CMD; the quiver command, in JSON array format, you want to execute.
 
-### Demo Prerequisites
+### Demo prerequisites
 It is presumed that you have the following:
 - Basic knowledge of the OCP CLI and web console
 - A running [OpenShift Container Platform (OCP)](https://developers.redhat.com/products/openshift/overview/) or [minishift](https://github.com/minishift/minishift) environment
@@ -77,16 +77,16 @@ It is presumed that you have the following:
 1. Create project
 
         $ oc new-project quiver
-        
-2. Import the quiver image
+
+2. Import the Quiver image
 
         $ oc import-image quiver:latest --from=docker.io/ssorj/quiver --confirm
-        
+
 3. Add the view role to the default service account
 
         $ oc policy add-role-to-user view system:serviceaccount:$(oc project -q):default
-        
-4. Deploy a AMQ Broker
+
+4. Deploy AMQ Broker
 
         $ oc new-app --template=amq-broker-72-basic \
            -e AMQ_PROTOCOL=openwire,amqp,stomp,mqtt \
@@ -94,15 +94,15 @@ It is presumed that you have the following:
            -e AMQ_ADDRESSES=quiver \
            -e AMQ_USER=anonymous \
            -e ADMIN_PASSWORD=password
-       
+
         $ oc get pods --watch
 
-5. Deploy a AMQ Interconnect
+5. Deploy AMQ Interconnect
 
         $ oc new-app --template=amq-interconnect-1-basic
-       
+
         $ oc get pods --watch
-        
+
 ### Send messages to AMQ Broker
 6. Send 1,000,000 messages to the broker via the [core protocol](https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_the_amq_core_protocol_jms_client/)
 
@@ -115,7 +115,7 @@ It is presumed that you have the following:
 
         $ oc get pods --watch
         $ oc logs -f {insert value of new pod name}
-    
+
             ---------------------- Sender -----------------------  --------------------- Receiver ----------------------  --------
             Time [s]      Count [m]  Rate [m/s]  CPU [%]  RSS [M]  Time [s]      Count [m]  Rate [m/s]  CPU [%]  RSS [M]  Lat [ms]
             -----------------------------------------------------  -----------------------------------------------------  --------
@@ -151,7 +151,7 @@ It is presumed that you have the following:
                      50%:        3 ms                99.90%:      122 ms
                     100%:      449 ms                99.99%:      334 ms
             --------------------------------------------------------------------------------
-        
+
 8. Send 1,000,000 messages to the broker via the [JMS client over AMQP protocol](https://access.redhat.com/documentation/en-us/red_hat_amq/7.2/html-single/using_the_amq_jms_client/)
 
         $ oc process -f https://raw.githubusercontent.com/ssorj/quiver/0.2.0/packaging/openshift/openshift-pod-template.yml \
@@ -159,11 +159,11 @@ It is presumed that you have the following:
                 DOCKER_CMD="[\"quiver\", \"amqp://broker-amq-amqp:5672/qpid-jms-over-ampq\", \"--impl\", \"qpid-jms\", \"--verbose\"]" \
                 | oc create -f -
 
-9. Look at output for AMQP client pod
+9. Look at output for the AMQP client pod
 
         $ oc get pods --watch
         $ oc logs -f {insert value of new pod name}
-        
+
             ---------------------- Sender -----------------------  --------------------- Receiver ----------------------  --------
             Time [s]      Count [m]  Rate [m/s]  CPU [%]  RSS [M]  Time [s]      Count [m]  Rate [m/s]  CPU [%]  RSS [M]  Lat [ms]
             -----------------------------------------------------  -----------------------------------------------------  --------
@@ -212,7 +212,7 @@ It is presumed that you have the following:
                      50%:        4 ms                99.90%:      509 ms
                     100%:      526 ms                99.99%:      521 ms
             --------------------------------------------------------------------------------
-        
+
 ### Send messages to AMQ Interconnect
 10. Send 1,000,000 messages to the interconnect via the JMS client over AMQP protocol
 
@@ -220,12 +220,12 @@ It is presumed that you have the following:
                 DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
                 DOCKER_CMD="[\"quiver\", \"amqp://amq-interconnect:5672/qpid-jms-over-ampq-via-interconnect\", \"--impl\", \"qpid-jms\", \"--verbose\"]" \
                 | oc create -f -
-                
+
 11. Look at output for AMQP client pod
 
         $ oc get pods --watch
         $ oc logs -f {insert value of new pod name}
-        
+
             ---------------------- Sender -----------------------  --------------------- Receiver ----------------------  --------
             Time [s]      Count [m]  Rate [m/s]  CPU [%]  RSS [M]  Time [s]      Count [m]  Rate [m/s]  CPU [%]  RSS [M]  Lat [ms]
             -----------------------------------------------------  -----------------------------------------------------  --------
@@ -279,7 +279,7 @@ It is presumed that you have the following:
 12. Cleanup and delete all quiver pods
 
         $ oc delete pod -l app=quiver
-        
+
 ## Does your client use another language?
 If your language of choice was not shown in the demo; the good news is that Quiver supports several [implementations](https://github.com/ssorj/quiver#quiver-1).
 The below are provided examples:
@@ -288,17 +288,17 @@ The below are provided examples:
             DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
             DOCKER_CMD="[\"quiver\", \"//broker-amq-tcp:61616/activemq-jms\", \"--impl\", \"activemq-jms\", \"--verbose\"]" \
             | oc create -f -
-            
+
     $ oc process -f https://raw.githubusercontent.com/ssorj/quiver/0.2.0/packaging/openshift/openshift-pod-template.yml \
             DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
             DOCKER_CMD="[\"quiver\", \"//broker-amq-tcp:61616/qpid-messaging-cpp\", \"--impl\", \"qpid-messaging-cpp\", \"--verbose\"]" \
             | oc create -f -
-            
+
     $ oc process -f https://raw.githubusercontent.com/ssorj/quiver/0.2.0/packaging/openshift/openshift-pod-template.yml \
             DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
             DOCKER_CMD="[\"quiver\", \"//broker-amq-tcp:61616/qpid-messaging-python\", \"--impl\", \"qpid-messaging-python\", \"--verbose\"]" \
             | oc create -f -
-            
+
     $ oc process -f https://raw.githubusercontent.com/ssorj/quiver/0.2.0/packaging/openshift/openshift-pod-template.yml \
             DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
             DOCKER_CMD="[\"quiver\", \"//broker-amq-tcp:61616/qpid-proton-c\", \"--impl\", \"qpid-proton-c\", \"--verbose\"]" \
@@ -308,7 +308,7 @@ The below are provided examples:
             DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
             DOCKER_CMD="[\"quiver\", \"//broker-amq-tcp:61616/qpid-proton-cpp\", \"--impl\", \"qpid-proton-cpp\", \"--verbose\"]" \
             | oc create -f -
-            
+
     $ oc process -f https://raw.githubusercontent.com/ssorj/quiver/0.2.0/packaging/openshift/openshift-pod-template.yml \
             DOCKER_IMAGE=$(oc get is quiver -o jsonpath='{.status.dockerImageRepository}'):latest \
             DOCKER_CMD="[\"quiver\", \"//broker-amq-tcp:61616/qpid-proton-python\", \"--impl\", \"qpid-proton-python\", \"--verbose\"]" \
@@ -320,15 +320,15 @@ The below are provided examples:
             | oc create -f -
 
 ## Food for thought
-Hopefully, the demo has shown how easy it is to use Quiver to interact with the AMQ Broker and AMQ Interconnect on OCP.
+Hopefully, the demo has shown how easy it is to use Quiver to interact with AMQ Broker and AMQ Interconnect on OCP.
 
-It should of also raised questions around how Quiver could be integrated into your own systems. For example:
+It should have also raised questions around how Quiver could be integrated into your own systems. For example:
 - Could Quiver be part of your mvn integration tests?
 - Could Quiver be added as a stage within your CI/CD pipeline for smoke testing?
 - Could the results of the smoke test pass/fail the deployment?
 - Could Quiver be used as part of a heart-beat monitoring system to validate that the broker is alive?
 
-These are several scenarios which I see Quiver being highly useful and hopefully you've also thought of others.
+These are several scenarios for which I see Quiver being highly useful and hopefully you've also thought of others.
 
 ## <a name="DISCLAIMER"></a>DISCLAIMER
 [1] Although Quiver is developed by Red Hat employees; it is not supported under a Red Hat subscription and is strictly an upstream project.
